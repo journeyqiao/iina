@@ -980,7 +980,7 @@ class PlayerCore: NSObject {
       Preference.set(url, for: .iinaLastPlayedFilePath)
       // Write to cache directly (rather than calling `refreshCachedVideoProgress`).
       // If user only closed the window but didn't quit the app, this can make sure playlist displays the correct progress.
-      info.infoQueue.async {
+      playlistQueue.async {
         self.info.cachedVideoDurationAndProgress[url.path] = (duration: self.info.videoDuration?.second, progress: self.info.videoPosition?.second)
       }
     }
@@ -1260,8 +1260,8 @@ class PlayerCore: NSObject {
 
     case .playButton:
       let pause = mpv.getFlag(MPVOption.PlaybackControl.pause)
-      info.isPaused = pause
       DispatchQueue.main.async {
+        self.info.isPaused = pause
         self.mainWindow.updatePlayButtonState(pause ? .off : .on)
         self.miniPlayer.updatePlayButtonState(pause ? .off : .on)
         if #available(macOS 10.12.2, *) {
@@ -1579,12 +1579,10 @@ class PlayerCore: NSObject {
   func refreshCachedVideoProgress(forVideoPath path: String) {
     let duration = FFmpegController.probeVideoDuration(forFile: path)
     let progress = Utility.playbackProgressFromWatchLater(path.md5)
-    info.infoQueue.async {  // Running in the background thread
-      self.info.cachedVideoDurationAndProgress[path] = (
-        duration: duration,
-        progress: progress?.second
-      )
-    }
+    self.info.cachedVideoDurationAndProgress[path] = (
+      duration: duration,
+      progress: progress?.second
+    )
   }
 
   enum CurrentMediaIsAudioStatus {

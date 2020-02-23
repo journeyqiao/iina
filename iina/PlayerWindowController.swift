@@ -11,7 +11,7 @@ import Cocoa
 class PlayerWindowController: NSWindowController, NSWindowDelegate {
 
   unowned var player: PlayerCore
-  
+
   var videoView: VideoView {
     fatalError("Subclass must implement")
   }
@@ -176,7 +176,7 @@ class PlayerWindowController: NSWindowController, NSWindowDelegate {
     addObserver(to: .default, forName: .iinaFileLoaded, object: player) { [unowned self] _ in
       self.updateTitle()
     }
-    
+
     NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: nil, using: { [unowned self] _ in
       if Preference.bool(for: .pauseWhenGoesToSleep) {
         self.player.pause()
